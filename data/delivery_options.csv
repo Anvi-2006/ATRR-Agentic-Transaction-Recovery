@@ -1,0 +1,9 @@
+product_id,standard_days,express_days,express_available
+P001,2,1,true
+P002,2,1,true
+P003,3,2,true
+P004,2,1,true
+P005,2,1,true
+P006,2,1,true
+P007,2,1,true
+P008,4,2,false

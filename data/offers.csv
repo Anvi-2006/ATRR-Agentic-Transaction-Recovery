@@ -1,0 +1,6 @@
+offer_id,product_id,discount_type,discount_value,min_order_value,active
+OFF001,P001,percent,5,3000,true
+OFF002,P003,flat,200,3000,true
+OFF003,P004,percent,10,5000,true
+OFF004,P005,percent,5,2000,true
+OFF005,P007,flat,1500,2000,true

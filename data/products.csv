@@ -1,0 +1,9 @@
+product_id,merchant_id,product_name,category,price,rating,margin_percent,return_window_days
+P001,M001,SoundMax Wireless Headphones,headphones,4499,4.4,18,7
+P002,M001,AeroBeat Pro Headphones,headphones,4999,4.6,22,7
+P003,M001,BassCore Bluetooth Headphones,headphones,3299,4.1,25,10
+P004,M001,NoiseGuard ANC Headphones,headphones,5799,4.7,20,7
+P005,M001,SoundMax Lite Earbuds,earbuds,2499,4.3,28,10
+P006,M001,PowerCharge 20W Adapter,chargers,899,4.5,30,7
+P007,M001,PowerCharge 65W GaN Charger,chargers,2499,4.7,24,10
+P008,M001,UltraView 27 Monitor,monitors,18999,4.6,16,7
