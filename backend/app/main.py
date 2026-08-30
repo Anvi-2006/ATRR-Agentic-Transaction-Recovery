@@ -1,5 +1,8 @@
 from fastapi import FastAPI
 
+from backend.app.api.recovery import router as recovery_router
+
+
 app = FastAPI(
     title="ATRR",
     description="Agentic Transaction Recovery & Replanning",
@@ -14,3 +17,6 @@ def health_check():
         "service": "ATRR",
         "message": "ATRR backend is running"
     }
+
+
+app.include_router(recovery_router)
