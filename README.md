@@ -1,15 +1,20 @@
-﻿**ATRR — Agentic Transaction Recovery & Replanning**
+﻿# ATRR — Agentic Transaction Recovery & Replanning
 
-ATRR (Agentic Transaction Recovery & Replanning) is a transaction recovery platform that helps recover failed transactions through constraint-aware recovery planning, policy verification, customer approval, execution, and adaptive replanning.
+**ATRR (Agentic Transaction Recovery & Replanning)** is an agentic transaction recovery platform designed to recover failed transactions through constraint-aware recovery planning, merchant policy verification, customer approval, execution control, and adaptive replanning.
 
-Instead of stopping at a failed recovery attempt, ATRR evaluates available recovery options, selects the best valid action, verifies merchant policy constraints, executes the action, records the outcome, and can select another available plan when an execution attempt fails.
+Instead of stopping at a failed recovery attempt, ATRR evaluates available recovery options, selects the best valid action, verifies policy constraints, executes the action, records the outcome, and can select another available plan when an execution attempt fails.
 
-Overview
+---
 
-Failed transactions can create customer dissatisfaction, merchant losses, and unnecessary manual intervention. ATRR provides a structured recovery workflow that evaluates available recovery actions against transaction requirements and merchant policies.
+## Overview
 
-The core recovery flow is:
+Failed transactions can create customer dissatisfaction, merchant losses, and unnecessary manual intervention.
 
+ATRR provides a structured recovery workflow that evaluates available recovery actions against transaction requirements and merchant policies.
+
+### Core Recovery Flow
+
+```text
 Failed Transaction
         |
         v
@@ -50,109 +55,72 @@ Recovered   Replanning
                |
                v
         Next Safe Action
+```
 
-Key Features
+---
 
-Constraint-Aware Recovery
+## Features
 
-Recovery candidates are evaluated against transaction requirements such as:
+### Constraint-Aware Recovery
 
-Maximum customer budget
+ATRR evaluates recovery candidates against transaction requirements such as:
 
-Minimum product rating
+* Maximum customer budget
+* Minimum product rating
+* Delivery deadline
+* Failed product exclusion
 
-Delivery deadline
+Only candidates that satisfy the current constraints are converted into executable recovery plans.
 
-Failed product exclusion
+### Recovery Plan Generation
 
-Only valid candidates are converted into executable recovery plans.
+Valid candidates are transformed into structured recovery plans containing:
 
-Recovery Plan Generation
+* Plan ID
+* Action type
+* Product ID
+* Customer cost
+* Expected revenue
+* Expected merchant value
+* Constraint status
+* Recovery explanation
 
-Valid candidates are transformed into structured recovery plans containing information such as:
+### Recovery Plan Ranking
 
-Plan ID
+Recovery plans are ranked using expected merchant value so that ATRR can prioritize the best available valid recovery option.
 
-Action type
-
-Product ID
-
-Customer cost
-
-Expected revenue
-
-Expected merchant value
-
-Constraint status
-
-Recovery explanation
-
-Recovery Plan Ranking
-
-Recovery plans are ranked using expected merchant value so that the system can prioritize the best available valid recovery option.
-
-Decision Agent
+### Decision Agent
 
 The Decision Agent receives the current recovery context and selects the highest-ranked recovery plan that has not already been attempted.
 
-Its context includes:
+The decision context includes:
 
-Transaction intent
+* Transaction intent
+* Available recovery plans
+* Merchant policy
+* Previous recovery attempts
 
-Available recovery plans
-
-Merchant policy
-
-Previous recovery attempts
-
-Merchant Policy Verification
+### Merchant Policy Verification
 
 Before execution, the selected recovery action is checked against the applicable merchant policy.
 
-Customer Approval
+### Customer Approval
 
-Customer approval is treated as an explicit execution gate. If approval is not provided, the recovery process stops without executing another recovery action.
+Customer approval is treated as an explicit execution gate.
 
-Automatic Replanning
+If approval is not provided, the recovery process stops without executing another recovery action.
 
-When a recovery execution attempt fails, ATRR records the failed attempt and updates the recovery context. Previously attempted actions are excluded from subsequent decisions so another available recovery plan can be selected.
+### Automatic Replanning
 
-Recovery Plan 1
-      |
-      v
-Execution
-      |
-      v
-   FAILURE
-      |
-      v
-Failed Attempt Recorded
-      |
-      v
-Replanning Triggered
-      |
-      v
-Decision Agent
-      |
-      v
-Previously Attempted Plan Excluded
-      |
-      v
-Next Available Recovery Plan
-      |
-      v
-Execution
-      |
-      v
-   SUCCESS
-      |
-      v
-  RECOVERED
+When a recovery execution attempt fails, ATRR records the failed attempt and updates the recovery context.
 
-Audit Trail
+Previously attempted actions are excluded from subsequent decisions so another available recovery plan can be selected.
 
-ATRR records the recovery lifecycle using structured audit events such as:
+### Audit Trail
 
+ATRR records important recovery events throughout the recovery lifecycle, including:
+
+```text
 RECOVERY_STARTED
 PLANS_GENERATED
 AGENT_DECISION
@@ -162,9 +130,13 @@ EXECUTION
 REPLANNING_TRIGGERED
 RECOVERY_COMPLETED
 RECOVERY_FAILED
+```
 
-System Architecture
+---
 
+## System Architecture
+
+```text
                          +----------------------+
                          |    React Frontend    |
                          |   Recovery Console   |
@@ -193,67 +165,107 @@ System Architecture
                                     |
                                     v
                               Audit Service
+```
 
-Technology Stack
+---
 
-Backend
+## Recovery Decision Flow
 
-Python 3.11
+```text
+Failed Transaction
+        |
+        v
+Create Transaction Intent
+        |
+        v
+Find Recovery Candidates
+        |
+        v
+Validate Constraints
+        |
+        v
+Generate Recovery Plans
+        |
+        v
+Rank Recovery Plans
+        |
+        v
+Decision Agent
+        |
+        v
+Policy Verification
+        |
+        v
+Customer Approval
+        |
+        v
+Execute Selected Action
+        |
+        +-------------------+
+        |                   |
+        v                   v
+     SUCCESS             FAILURE
+        |                   |
+        v                   v
+   RECOVERED         Record Attempt
+                            |
+                            v
+                     Replanning
+                            |
+                            v
+                     Decision Agent
+                            |
+                            v
+                    Next Safe Action
+```
 
-FastAPI
+---
 
-Pydantic
+## Technology Stack
 
-Uvicorn
+### Backend
 
-Pytest
+* Python 3.11
+* FastAPI
+* Pydantic
+* Uvicorn
+* Pytest
 
-Frontend
+### Frontend
 
-React 19
+* React 19
+* Vite
+* Axios
+* Tailwind CSS
+* Lucide React
+* React Router
+* Recharts
 
-Vite
-
-Axios
-
-Tailwind CSS
-
-Lucide React
-
-React Router
-
-Recharts
-
-Data
+### Data Layer
 
 The current prototype uses CSV-based data for:
 
-Products
+* Products
+* Inventory
+* Merchants
+* Offers
+* Delivery options
+* Merchant policies
 
-Inventory
+### Development Tools
 
-Merchants
+* Git
+* GitHub
+* Visual Studio Code
+* PowerShell
+* npm
+* Pytest
 
-Offers
+---
 
-Delivery options
+## Project Structure
 
-Merchant policies
-
-Development Tools
-
-Git
-
-GitHub
-
-Visual Studio Code
-
-PowerShell
-
-npm
-
-Project Structure
-
+```text
 ATRR-Agentic-Transaction-Recovery/
 │
 ├── backend/
@@ -342,98 +354,131 @@ ATRR-Agentic-Transaction-Recovery/
 ├── .gitignore
 ├── README.md
 └── requirements.txt
+```
 
-Installation
+---
 
-Prerequisites
+## Installation
 
-Make sure you have:
+### Prerequisites
 
-Python 3.11+
+Make sure you have the following installed:
 
-Node.js and npm
+* Python 3.11+
+* Node.js
+* npm
+* Git
 
-Git
+### Clone the Repository
 
-Clone the Repository
-
+```bash
 git clone https://github.com/Anvi-2006/ATRR-Agentic-Transaction-Recovery.git
 cd ATRR-Agentic-Transaction-Recovery
+```
 
-Create and Activate the Python Environment
+### Create the Python Virtual Environment
 
 Windows PowerShell:
 
+```powershell
 python -m venv venv
 .\venv\Scripts\Activate.ps1
+```
 
-If the virtual environment already exists, activate it instead:
+If the virtual environment already exists:
 
+```powershell
 .\venv\Scripts\Activate.ps1
+```
 
-Install Backend Dependencies
+### Install Backend Dependencies
 
+```powershell
 pip install -r requirements.txt
+```
 
-Install Frontend Dependencies
+### Install Frontend Dependencies
 
+```powershell
 cd frontend
 npm install
 cd ..
+```
 
-Running the Application
+---
 
-Start the Backend
+## Running the Application
+
+### Start the Backend
 
 From the project root:
 
+```powershell
 python -m uvicorn backend.app.main:app --reload --port 8000
+```
 
-The backend runs at:
+The backend will run at:
 
+```text
 http://127.0.0.1:8000
+```
 
-Health Check
+### Health Check
 
 Open:
 
+```text
 http://127.0.0.1:8000/health
+```
 
 Expected response:
 
+```json
 {
   "status": "ok",
   "service": "ATRR",
   "message": "ATRR backend is running"
 }
+```
 
-API Documentation
+### API Documentation
 
 FastAPI interactive documentation is available at:
 
+```text
 http://127.0.0.1:8000/docs
+```
 
-Start the Frontend
+### Start the Frontend
 
 Open a second terminal:
 
+```powershell
 cd frontend
 npm run dev
+```
 
-Vite will provide a local URL such as:
+Vite will provide a local URL, typically:
 
+```text
 http://localhost:5173
+```
 
 If the port is already in use, Vite will automatically select another available port.
 
-Recovery API
+---
 
-Endpoint
+## API
 
+### Recovery Endpoint
+
+```text
 POST /api/v1/recover
+```
 
-Example Request
+### Request Body
 
+```json
 {
   "transaction_id": "TXN-DEMO-001",
   "category": "headphones",
@@ -443,9 +488,11 @@ Example Request
   "failed_product_id": "P003",
   "customer_approved": true
 }
+```
 
-Example Successful Response
+### Successful Response
 
+```json
 {
   "transaction_id": "TXN-DEMO-001",
   "status": "RECOVERED",
@@ -458,13 +505,17 @@ Example Successful Response
     "constraint_safe": true
   }
 }
+```
 
-The complete API response also includes recovery attempts and audit events.
+The complete response also contains recovery attempts and audit events.
 
-Customer Approval Flow
+---
+
+## Customer Approval Flow
 
 Customer approval acts as an explicit execution safeguard.
 
+```text
 Recovery Plan
       |
       v
@@ -480,13 +531,21 @@ Customer Approval?
     |          |
     v          v
 Recovered   CUSTOMER_APPROVAL_REQUIRED
+```
 
-Replanning Flow
+This ensures the platform does not continue recovery execution without customer authorization.
+
+---
+
+## Replanning
 
 ATRR supports adaptive recovery when an execution attempt fails.
 
-The Decision Agent receives the previous recovery attempts as part of the current recovery context. Previously attempted actions are excluded from further selection.
+The Decision Agent receives previous recovery attempts as part of the current recovery context.
 
+Previously attempted actions are excluded from subsequent decisions.
+
+```text
 Attempt 1
    |
    v
@@ -512,19 +571,29 @@ Execution Success
    |
    v
 RECOVERED
+```
 
 The replanning behavior is covered by:
 
+```text
 tests/test_recovery_orchestrator.py
+```
 
-with the test:
+Specifically:
 
+```text
 test_agent_replans_after_execution_failure
+```
 
-Audit Trail
+---
 
-A typical successful recovery produces:
+## Audit Trail
 
+ATRR provides a structured audit trail for recovery decisions and actions.
+
+### Typical Successful Recovery
+
+```text
 RECOVERY_STARTED
         ↓
 PLANS_GENERATED
@@ -538,9 +607,11 @@ POLICY_CHECK
 EXECUTION
         ↓
 RECOVERY_COMPLETED
+```
 
-A recovery involving an execution failure can additionally include:
+### Recovery with Replanning
 
+```text
 EXECUTION
     |
     v
@@ -560,77 +631,56 @@ EXECUTION
     |
     v
 RECOVERY_COMPLETED
+```
 
-Frontend
+---
 
-The React frontend provides a transaction recovery console where users can:
-
-Enter transaction details
-
-Set the maximum budget
-
-Set the minimum rating
-
-Set the delivery deadline
-
-Specify the failed product
-
-Provide customer approval
-
-Start a recovery request
-
-View recovery status
-
-View the selected recovery action
-
-View recovery activity and audit events
-
-The frontend communicates with the FastAPI backend through the recovery API.
-
-Example Recovery Scenario
+## Example Recovery Scenario
 
 A sample recovery request can use:
 
-Transaction ID       : TXN-DEMO-001
-Category             : headphones
-Maximum budget       : ₹5,000
-Minimum rating       : 4.0
-Delivery deadline    : 2 days
-Failed product       : P003
-Customer approval    : Approved
+| Field             | Value          |
+| ----------------- | -------------- |
+| Transaction ID    | `TXN-DEMO-001` |
+| Category          | `headphones`   |
+| Maximum budget    | ₹5,000         |
+| Minimum rating    | 4.0            |
+| Delivery deadline | 2 days         |
+| Failed product    | `P003`         |
+| Customer approval | Approved       |
 
-A successful recovery can result in:
+Example recovery outcome:
 
-Failed Product
-      |
-      v
-P003
-      |
-      v
-Candidate Evaluation
-      |
-      v
-P001 Selected
-      |
-      v
-Policy Approved
-      |
-      v
-Execution Successful
-      |
-      v
-RECOVERED
+| Result           | Value              |
+| ---------------- | ------------------ |
+| Selected product | `P001`             |
+| Action           | Substitute product |
+| Customer cost    | ₹4,499             |
+| Merchant value   | ₹809.82            |
+| Constraint check | Passed             |
+| Final status     | `RECOVERED`        |
 
-Example selected recovery:
+---
 
-Product ID       : P001
-Customer Cost    : ₹4,499
-Merchant Value   : ₹809.82
-Constraint Check : Passed
-Status           : RECOVERED
+## Frontend
 
-UI Flow
+The React frontend provides a transaction recovery console where users can:
 
+* Enter transaction details
+* Set the maximum budget
+* Set the minimum rating
+* Set the delivery deadline
+* Specify the failed product
+* Provide customer approval
+* Start a recovery request
+* View recovery status
+* View the selected recovery action
+* View recovery activity
+* View the audit trail
+
+### UI Flow
+
+```text
 Recovery Request
        |
        v
@@ -641,176 +691,166 @@ Selected Recovery
        |
        v
 Recovery Activity
+```
 
-The interface is designed as a transaction operations console focused on the recovery workflow, decisions, outcomes, and auditability.
+The interface is designed as a transaction operations console focused on recovery decisions, outcomes, and auditability.
 
-Testing
+---
 
-Run the complete backend test suite from the project root:
+## Testing
 
+Run the complete backend test suite:
+
+```powershell
 python -m pytest
+```
 
-Current test result:
+### Current Test Result
 
+```text
 59 passed
+```
 
 The test suite covers:
 
-Transaction intent
+* Transaction intent
+* Candidate selection
+* Constraint validation
+* Decision Agent
+* Execution service
+* Merchant data service
+* Policy service
+* Recovery action service
+* Recovery service
+* Recovery orchestration
+* Replanning service
+* Audit service
 
-Candidate selection
+---
 
-Constraint validation
-
-Decision Agent
-
-Execution service
-
-Merchant data service
-
-Policy service
-
-Recovery action service
-
-Recovery service
-
-Recovery orchestration
-
-Replanning service
-
-Audit service
-
-Frontend Production Build
+## Frontend Production Build
 
 To verify the frontend production build:
 
+```powershell
 cd frontend
 npm run build
+```
 
-The current frontend production build has been successfully verified.
+The production frontend build has been successfully verified.
 
-Design Principles
+---
 
-Safety
+## Design Principles
+
+### Safety
 
 Recovery actions must satisfy customer and merchant constraints before execution.
 
-Customer Control
+### Customer Control
 
 Customer approval remains an explicit execution gate.
 
-Adaptability
+### Adaptability
 
 Failed recovery attempts can trigger another decision using the updated recovery context.
 
-Traceability
+### Traceability
 
 Recovery decisions, policy checks, execution outcomes, and recovery results are recorded in the audit trail.
 
-Current Implementation Status
+---
 
-The current prototype includes:
+## Current Implementation Status
 
-Constraint-aware candidate selection
+| Component                            | Status      |
+| ------------------------------------ | ----------- |
+| Constraint-aware candidate selection | ✅           |
+| Recovery plan generation             | ✅           |
+| Recovery plan ranking                | ✅           |
+| Decision Agent                       | ✅           |
+| Policy verification                  | ✅           |
+| Customer approval gate               | ✅           |
+| Execution gate                       | ✅           |
+| Recovery attempt tracking            | ✅           |
+| Replanning after execution failure   | ✅           |
+| Audit trail                          | ✅           |
+| FastAPI recovery API                 | ✅           |
+| React frontend                       | ✅           |
+| Frontend-to-backend integration      | ✅           |
+| Backend test suite                   | ✅ 59 passed |
+| Frontend production build            | ✅           |
 
-Recovery plan generation
+---
 
-Recovery plan ranking
-
-Decision Agent
-
-Policy verification
-
-Customer approval gate
-
-Execution gate
-
-Recovery attempt tracking
-
-Replanning after execution failure
-
-Audit trail
-
-FastAPI recovery API
-
-React frontend
-
-Frontend-to-backend integration
-
-Backend Tests
-
-59 passed
-
-Frontend Build
-
-Production build successful
-
-Future Improvements
+## Future Improvements
 
 Possible future enhancements include:
 
-Persistent transaction storage
+* Persistent transaction storage
+* Production database integration
+* Real merchant API integration
+* Real payment gateway integration
+* Real-time transaction monitoring
+* Authentication and role-based access
+* Advanced recovery analytics
+* Notification services
+* Production-grade observability
+* Distributed execution workers
+* Additional recovery action types
+* Enhanced recovery simulation and failure scenarios
 
-Production database integration
+---
 
-Real merchant API integration
+## Screenshots
 
-Real payment gateway integration
+Add screenshots of the application here when preparing the final repository presentation.
 
-Real-time transaction monitoring
+Recommended screenshots:
 
-Authentication and role-based access
+1. **ATRR Transaction Recovery Dashboard**
+2. **Successful Recovery Result**
+3. **Recovery Status Pipeline**
+4. **Recovery Audit Trail**
+5. **Replanning Scenario**
 
-Advanced recovery analytics
+Suggested directory:
 
-Notification services
-
-Production-grade observability
-
-Distributed execution workers
-
-Additional recovery action types
-
-Enhanced recovery simulation and failure scenarios
-
-Screenshots
-
-Suggested screenshots for the repository include:
-
+```text
 screenshots/
 ├── dashboard.png
 ├── recovery-success.png
 ├── audit-trail.png
 └── replanning.png
+```
 
-Recommended screenshots:
+Once screenshots are added, they can be embedded using standard Markdown image syntax:
 
-ATRR Transaction Recovery Dashboard
+```markdown
+![ATRR Dashboard](screenshots/dashboard.png)
+```
 
-Successful Recovery Result
+---
 
-Recovery Status Pipeline
-
-Recovery Audit Trail
-
-Replanning Scenario
-
-Demo Flow
+## Demo Flow
 
 A basic demonstration can follow this sequence:
 
+```text
 1. Enter a failed transaction.
 2. Define the customer's recovery constraints.
 3. Provide customer approval.
 4. Start the recovery process.
 5. Review the selected recovery plan.
-6. Verify policy status.
+6. Verify the policy status.
 7. Execute the selected recovery action.
 8. View the final recovery result.
 9. Review the audit trail.
+```
 
 For an adaptive recovery scenario:
 
+```text
 First Action
      |
      v
@@ -824,21 +864,28 @@ Next Safe Action
      |
      v
 Successful Recovery
+```
 
-Repository
+---
 
-GitHub Repository:
+## Repository
+
+**GitHub Repository:**
 
 https://github.com/Anvi-2006/ATRR-Agentic-Transaction-Recovery
 
-Author
+---
 
-Anvi Pardhi
+## Author
+
+**Anvi Pardhi**
 
 Information Technology Student
 
 Interested in software engineering, full-stack development, AI systems, and building practical technology solutions.
 
-License
+---
+
+## License
 
 This project was developed as a hackathon prototype for exploring safe, adaptive, and traceable transaction recovery workflows.
