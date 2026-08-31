@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import axios from "axios";
 import {
   ShieldCheck,
@@ -11,6 +11,7 @@ import {
   LockKeyhole,
   PackageCheck,
   FileCheck2,
+  RefreshCw,
 } from "lucide-react";
 import "./App.css";
 
@@ -76,18 +77,31 @@ function App() {
   };
 
   const isRecovered = result?.status === "RECOVERED";
-
   const selectedAction = result?.selected_action;
+  const auditEvents = Array.from(new Map((result?.audit_events || []).map((event) => [event.event_id, event])).values());
 
-  const auditEvents = result?.audit_events || [];
+  const getStepState = (step) => {
+    if (!result) return "waiting";
+
+    if (step <= 3) return "completed";
+
+    if (step === 4) {
+      return form.customer_approved ? "completed" : "blocked";
+    }
+
+    if (step === 5) {
+      return isRecovered ? "completed" : "blocked";
+    }
+
+    return "waiting";
+  };
 
   return (
     <div className="app-shell">
-      {/* Header */}
       <header className="topbar">
         <div className="brand">
           <div className="brand-mark">
-            <ShieldCheck size={19} />
+            <ShieldCheck size={18} strokeWidth={2.2} />
           </div>
 
           <div>
@@ -99,34 +113,34 @@ function App() {
         </div>
 
         <div className="system-state">
-          <span className="online-dot"></span>
+          <span className="online-dot" />
           Operational
         </div>
       </header>
 
       <main className="main-content">
-        {/* Hero */}
         <section className="hero">
-          <div>
+          <div className="hero-copy">
             <div className="eyebrow">TRANSACTION RECOVERY</div>
 
             <h1>
               Recover failed transactions.
               <br />
-              <span>Automatically. Safely.</span>
+              <span>Safely and automatically.</span>
             </h1>
 
             <p>
-              Evaluate recovery options, verify merchant policies,
-              obtain customer approval, and execute the safest available
-              action.
+              Evaluate available recovery options, verify merchant
+              constraints, obtain customer approval, and execute the
+              selected recovery action.
             </p>
           </div>
 
           <div className="hero-status">
             <div className="hero-status-icon">
-              <Zap size={17} />
+              <Zap size={16} />
             </div>
+
             <div>
               <strong>Recovery engine</strong>
               <span>Ready to process</span>
@@ -134,9 +148,7 @@ function App() {
           </div>
         </section>
 
-        {/* Main grid */}
         <section className="workspace">
-          {/* Transaction request */}
           <div className="card request-card">
             <div className="card-header">
               <div>
@@ -160,7 +172,9 @@ function App() {
                 <Field
                   label="Category"
                   value={form.category}
-                  onChange={(value) => updateField("category", value)}
+                  onChange={(value) =>
+                    updateField("category", value)
+                  }
                 />
 
                 <Field
@@ -189,7 +203,10 @@ function App() {
                   type="number"
                   suffix="days"
                   onChange={(value) =>
-                    updateField("delivery_deadline_days", value)
+                    updateField(
+                      "delivery_deadline_days",
+                      value
+                    )
                   }
                 />
 
@@ -197,7 +214,10 @@ function App() {
                   label="Failed product"
                   value={form.failed_product_id}
                   onChange={(value) =>
-                    updateField("failed_product_id", value)
+                    updateField(
+                      "failed_product_id",
+                      value
+                    )
                   }
                 />
               </div>
@@ -205,16 +225,19 @@ function App() {
               <div className="approval-row">
                 <div className="approval-info">
                   <div className="approval-icon">
-                    <LockKeyhole size={16} />
+                    <LockKeyhole size={15} />
                   </div>
 
                   <div>
                     <strong>Customer approval</strong>
-                    <span>Required before recovery execution</span>
+                    <span>
+                      Required before recovery execution
+                    </span>
                   </div>
                 </div>
 
                 <button
+                  type="button"
                   className={`approval-toggle ${
                     form.customer_approved ? "approved" : ""
                   }`}
@@ -225,44 +248,52 @@ function App() {
                     )
                   }
                 >
-                  <CheckCircle2 size={15} />
-                  {form.customer_approved ? "Approved" : "Required"}
+                  <CheckCircle2 size={14} />
+
+                  {form.customer_approved
+                    ? "Approved"
+                    : "Required"}
                 </button>
               </div>
 
               <button
+                type="button"
                 className="primary-button"
                 onClick={recoverTransaction}
                 disabled={loading}
               >
                 {loading ? (
                   <>
-                    <RotateCcw className="spin" size={17} />
+                    <RotateCcw
+                      className="spin"
+                      size={16}
+                    />
                     Processing recovery...
                   </>
                 ) : (
                   <>
-                    <Zap size={17} />
+                    <Zap size={16} />
                     Recover transaction
-                    <ArrowRight size={17} />
+                    <ArrowRight size={16} />
                   </>
                 )}
               </button>
 
               {error && (
                 <div className="error-box">
-                  <CircleAlert size={17} />
+                  <CircleAlert size={16} />
                   <span>{error}</span>
                 </div>
               )}
             </div>
           </div>
 
-          {/* Recovery status */}
           <div className="card status-card">
             <div className="card-header">
               <div>
-                <div className="section-label">02 / RECOVERY STATUS</div>
+                <div className="section-label">
+                  02 / RECOVERY STATUS
+                </div>
                 <h2>Process status</h2>
               </div>
 
@@ -275,36 +306,31 @@ function App() {
               <StatusStep
                 number="01"
                 title="Request received"
-                active={!!result}
-                completed={!!result}
+                state={getStepState(1)}
               />
 
               <StatusStep
                 number="02"
                 title="Recovery options evaluated"
-                active={!!result}
-                completed={!!result}
+                state={getStepState(2)}
               />
 
               <StatusStep
                 number="03"
                 title="Policy verified"
-                active={!!result}
-                completed={!!result}
+                state={getStepState(3)}
               />
 
               <StatusStep
                 number="04"
                 title="Customer approval"
-                active={!!result}
-                completed={!!result && form.customer_approved}
+                state={getStepState(4)}
               />
 
               <StatusStep
                 number="05"
                 title="Execution"
-                active={!!result}
-                completed={isRecovered}
+                state={getStepState(5)}
                 last
               />
 
@@ -315,9 +341,9 @@ function App() {
                   }`}
                 >
                   {isRecovered ? (
-                    <CheckCircle2 size={20} />
+                    <CheckCircle2 size={19} />
                   ) : (
-                    <CircleAlert size={20} />
+                    <CircleAlert size={19} />
                   )}
 
                   <div>
@@ -330,29 +356,33 @@ function App() {
           </div>
         </section>
 
-        {/* Recovery options */}
         {result && selectedAction && (
           <section className="card recommendation-card">
             <div className="card-header">
               <div>
-                <div className="section-label">03 / RECOVERY RESULT</div>
-                <h2>Recommended recovery</h2>
+                <div className="section-label">
+                  03 / RECOVERY RESULT
+                </div>
+                <h2>Selected recovery</h2>
               </div>
 
               <span className="recommended-badge">
-                <CheckCircle2 size={14} />
-                Recommended
+                <CheckCircle2 size={13} />
+                Selected
               </span>
             </div>
 
             <div className="recommendation-content">
               <div className="product-icon">
-                <PackageCheck size={26} />
+                <PackageCheck size={24} />
               </div>
 
               <div className="product-main">
                 <span className="product-action">
-                  {selectedAction.action_type.replaceAll("_", " ")}
+                  {selectedAction.action_type.replaceAll(
+                    "_",
+                    " "
+                  )}
                 </span>
 
                 <h3>{selectedAction.product_id}</h3>
@@ -388,30 +418,42 @@ function App() {
           </section>
         )}
 
-        {/* Audit */}
         {result && (
           <section className="card audit-card">
             <div className="card-header">
               <div>
-                <div className="section-label">04 / AUDIT TRAIL</div>
+                <div className="section-label">
+                  04 / AUDIT TRAIL
+                </div>
                 <h2>Recovery activity</h2>
               </div>
 
-              <button className="text-button" onClick={resetRecovery}>
+              <button
+                type="button"
+                className="text-button"
+                onClick={resetRecovery}
+              >
+                <RefreshCw size={12} />
                 New recovery
               </button>
             </div>
 
             <div className="audit-list">
               {auditEvents.map((event) => (
-                <div className="audit-row" key={event.event_id}>
+                <div
+                  className="audit-row"
+                  key={event.event_id}
+                >
                   <div className="audit-icon">
-                    <FileCheck2 size={15} />
+                    <FileCheck2 size={14} />
                   </div>
 
                   <div className="audit-event">
                     <strong>
-                      {event.event_type.replaceAll("_", " ")}
+                      {event.event_type.replaceAll(
+                        "_",
+                        " "
+                      )}
                     </strong>
 
                     <span>{event.reason}</span>
@@ -426,17 +468,17 @@ function App() {
           </section>
         )}
 
-        {/* Empty result */}
         {!result && (
           <section className="card empty-card">
-            <Clock3 size={23} />
+            <Clock3 size={21} />
 
             <div>
               <h3>Ready for recovery</h3>
+
               <p>
-                Submit a transaction above to evaluate recovery
-                options, policy checks, execution results, and the
-                complete audit trail.
+                Submit a transaction to evaluate recovery
+                options, verify constraints, and create a
+                complete recovery record.
               </p>
             </div>
           </section>
@@ -471,7 +513,9 @@ function Field({
           type={type}
           value={value}
           step={step}
-          onChange={(event) => onChange(event.target.value)}
+          onChange={(event) =>
+            onChange(event.target.value)
+          }
         />
 
         {suffix && <small>{suffix}</small>}
@@ -480,31 +524,39 @@ function Field({
   );
 }
 
-function StatusStep({
-  number,
-  title,
-  active,
-  completed,
-  last,
-}) {
+function StatusStep({ number, title, state, last }) {
+  const completed = state === "completed";
+  const blocked = state === "blocked";
+
   return (
-    <div className={`status-step ${active ? "active" : ""}`}>
-      <div className={`step-number ${completed ? "completed" : ""}`}>
-        {completed ? <CheckCircle2 size={13} /> : number}
+    <div className="status-step">
+      <div
+        className={`step-number ${
+          completed ? "completed" : ""
+        } ${blocked ? "blocked" : ""}`}
+      >
+        {completed ? (
+          <CheckCircle2 size={13} />
+        ) : blocked ? (
+          <CircleAlert size={13} />
+        ) : (
+          number
+        )}
       </div>
 
       <div className="step-content">
         <strong>{title}</strong>
+
         <span>
           {completed
             ? "Completed"
-            : active
-            ? "Processing"
+            : blocked
+            ? "Blocked"
             : "Waiting"}
         </span>
       </div>
 
-      {!last && <div className="step-line"></div>}
+      {!last && <div className="step-line" />}
     </div>
   );
 }
@@ -519,3 +571,5 @@ function Metric({ label, value }) {
 }
 
 export default App;
+
+
