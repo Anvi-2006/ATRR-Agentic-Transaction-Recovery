@@ -124,3 +124,66 @@ def test_attempt_contains_transaction_identity():
     assert attempt.transaction_id == "TXN-005"
     assert attempt.attempt_id == "TXN-005-ATT-001"
     assert attempt.attempt_number == 1
+    
+def test_agent_replans_after_execution_failure():
+
+    orchestrator = RecoveryOrchestrator()
+
+    original_execute = orchestrator.execution_service.execute
+    call_count = 0
+
+    def fail_first_then_execute(request):
+
+        nonlocal call_count
+        call_count += 1
+
+        if call_count == 1:
+            from backend.app.models.execution_result import ExecutionResult
+
+            return ExecutionResult(
+                executed=False,
+                status="FAILED",
+                reason="Simulated execution failure for replanning test.",
+                action_id=request.action_id,
+            )
+
+        return original_execute(request)
+
+    orchestrator.execution_service.execute = fail_first_then_execute
+
+    intent = TransactionIntent(
+        category="headphones",
+        max_budget=6000,
+        min_rating=4.0,
+        delivery_deadline_days=2,
+    )
+
+    result = orchestrator.run(
+        transaction_id="TXN-REPLAN-001",
+        intent=intent,
+        failed_product_id="P003",
+        merchant_policy=build_policy(),
+        customer_approved=True,
+    )
+
+    assert result["status"] == "RECOVERED"
+    assert len(result["attempts"]) == 2
+
+    assert result["attempts"][0].status == "FAILED"
+    assert result["attempts"][1].status == "SUCCESS"
+
+    assert (
+        result["attempts"][0].action_id
+        != result["attempts"][1].action_id
+    )
+
+    assert result["selected_action"] is not None
+
+    event_types = [
+        event.event_type
+        for event in result["audit_events"]
+    ]
+
+    assert "AGENT_DECISION" in event_types
+    assert "REPLANNING_TRIGGERED" in event_types
+    assert "RECOVERY_COMPLETED" in event_types
