@@ -1,3 +1,5 @@
+from backend.app.agents.decision_agent import DecisionAgent
+from backend.app.agents.agent_context import AgentContext
 from backend.app.models.transaction_intent import TransactionIntent
 from backend.app.models.merchant_policy import MerchantPolicy
 from backend.app.models.execution_request import ExecutionRequest
@@ -19,7 +21,8 @@ class RecoveryOrchestrator:
         self.execution_service = ExecutionService()
         self.audit_service = AuditService()
         self.replanning_service = ReplanningService()
-
+        self.decision_agent = DecisionAgent()
+        
     def run(
         self,
         transaction_id: str,
@@ -68,25 +71,53 @@ class RecoveryOrchestrator:
             },
         )
 
-        # --------------------------------------------------
-        # 3. TRY PLANS IN RANKED ORDER
+       # --------------------------------------------------
+        # 3. DECISION AGENT
         # --------------------------------------------------
 
-        for plan in ranked_plans:
+        while True:
 
-            # Never retry an action that already failed
-            available_ids = (
-                self.replanning_service.filter_failed_actions(
-                    action_ids=[
-                        current_plan.plan_id
-                        for current_plan in ranked_plans
-                    ],
-                    attempts=attempts,
-                )
+            agent_context = AgentContext(
+                transaction_id=transaction_id,
+                intent=intent,
+                recovery_plans=ranked_plans,
+                merchant_policy=merchant_policy,
+                previous_attempts=attempts,
             )
 
-            if plan.plan_id not in available_ids:
-                continue
+            agent_decision = self.decision_agent.decide(
+                agent_context
+            )
+
+            self.audit_service.record(
+                transaction_id=transaction_id,
+                event_type="AGENT_DECISION",
+                status=agent_decision.decision,
+                reason=agent_decision.reason,
+                metadata={
+                    "selected_plan_id": agent_decision.selected_plan_id,
+                    "confidence": agent_decision.confidence,
+                    "replanning_required": agent_decision.replanning_required,
+                },
+            )
+
+            if agent_decision.selected_plan_id is None:
+
+                break
+
+            selected_plan = next(
+                (
+                    plan
+                    for plan in ranked_plans
+                    if plan.plan_id == agent_decision.selected_plan_id
+                ),
+                None,
+            )
+
+            if selected_plan is None:
+                break
+
+            plan = selected_plan
 
             # --------------------------------------------------
             # 4. PLAN → ACTION
