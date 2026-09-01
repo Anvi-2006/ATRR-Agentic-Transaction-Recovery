@@ -79,3 +79,53 @@ def test_execution_result_contains_reason():
     result = service.execute(request)
 
     assert result.reason
+def test_simulation_can_fail_first_payment_retry():
+
+    service = ExecutionService()
+
+    request = ExecutionRequest(
+        action_id="RETRY-P003-1",
+        policy_approved=True,
+        customer_approved=True,
+        simulation_mode=True,
+        attempt_number=1,
+    )
+
+    result = service.execute(request)
+
+    assert result.executed is False
+    assert result.status == "FAILED"
+
+
+def test_simulation_can_succeed_after_failure():
+
+    service = ExecutionService()
+
+    request = ExecutionRequest(
+        action_id="RETRY-P003-1",
+        policy_approved=True,
+        customer_approved=True,
+        simulation_mode=True,
+        attempt_number=2,
+    )
+
+    result = service.execute(request)
+
+    assert result.executed is True
+    assert result.status == "EXECUTED"
+
+
+def test_normal_execution_mode_still_succeeds():
+
+    service = ExecutionService()
+
+    request = ExecutionRequest(
+        action_id="RETRY-P003-1",
+        policy_approved=True,
+        customer_approved=True,
+    )
+
+    result = service.execute(request)
+
+    assert result.executed is True
+    assert result.status == "EXECUTED"

@@ -1,2 +1,2 @@
-merchant_id,max_discount_percent,min_margin_percent,allow_product_substitution,allow_payment_retry,max_payment_retries
-M001,15,10,true,true,2
+﻿merchant_id,max_discount_percent,min_margin_percent,allow_product_substitution,allow_payment_retry,max_payment_retries,allow_offer_incentive,allow_delivery_change,max_incentive_amount
+M001,15,10,true,true,2,true,true,500
