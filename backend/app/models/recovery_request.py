@@ -1,3 +1,5 @@
+﻿from typing import Literal
+
 from pydantic import BaseModel, Field
 
 
@@ -12,3 +14,10 @@ class RecoveryRequest(BaseModel):
     delivery_deadline_days: int | None = None
 
     customer_approved: bool = True
+
+    simulation_scenario: Literal[
+        "NORMAL",
+        "REPLAN",
+        "ESCALATE",
+        "STOP",
+    ] = "NORMAL"

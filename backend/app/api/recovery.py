@@ -1,11 +1,19 @@
-from fastapi import APIRouter
+﻿from fastapi import APIRouter, HTTPException
 
+from backend.app.models.batch_recovery import (
+    BatchRecoveryRequest,
+)
 from backend.app.models.recovery_request import RecoveryRequest
 from backend.app.models.transaction_intent import TransactionIntent
-from backend.app.models.merchant_policy import MerchantPolicy
 
 from backend.app.services.recovery_orchestrator import (
     RecoveryOrchestrator,
+)
+from backend.app.services.merchant_data_service import (
+    MerchantDataService,
+)
+from backend.app.services.batch_recovery_service import (
+    BatchRecoveryService,
 )
 
 
@@ -16,41 +24,34 @@ router = APIRouter(
 
 
 orchestrator = RecoveryOrchestrator()
+merchant_data = MerchantDataService()
+batch_service = BatchRecoveryService()
 
 
 @router.post("/recover")
 def recover_transaction(request: RecoveryRequest):
 
-    # -----------------------------------------
-    # 1. Build transaction intent
-    # -----------------------------------------
-
     intent = TransactionIntent(
         category=request.category,
         max_budget=request.max_budget,
         min_rating=request.min_rating,
-        delivery_deadline_days=request.delivery_deadline_days,
+        delivery_deadline_days=(
+            request.delivery_deadline_days
+        ),
     )
 
-    # -----------------------------------------
-    # 2. Merchant policy
-    # -----------------------------------------
-
-    merchant_policy = MerchantPolicy(
-        max_discount_percent=10,
-        max_incentive_amount=500,
-        allowed_actions=[
-            "substitute_product",
-            "change_delivery",
-            "offer_incentive",
-        ],
+    merchant_policy = (
+        merchant_data
+        .get_merchant_policy_model("M001")
     )
 
-    # -----------------------------------------
-    # 3. Run ATRR
-    # -----------------------------------------
+    if merchant_policy is None:
+        raise HTTPException(
+            status_code=500,
+            detail="Merchant policy could not be loaded.",
+        )
 
-    result = orchestrator.run(
+    return orchestrator.run(
         transaction_id=request.transaction_id,
         intent=intent,
         failed_product_id=request.failed_product_id,
@@ -58,4 +59,14 @@ def recover_transaction(request: RecoveryRequest):
         customer_approved=request.customer_approved,
     )
 
-    return result
+
+@router.post("/recover/batch")
+def recover_batch(request: BatchRecoveryRequest):
+
+    try:
+        return batch_service.process(request)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=500,
+            detail=str(exc),
+        )

@@ -1,3 +1,5 @@
+﻿from typing import Literal
+
 from pydantic import BaseModel
 
 from backend.app.models.transaction_intent import TransactionIntent
@@ -16,3 +18,10 @@ class AgentContext(BaseModel):
     merchant_policy: MerchantPolicy
 
     previous_attempts: list[RecoveryAttempt] = []
+
+    simulation_scenario: Literal[
+        "NORMAL",
+        "REPLAN",
+        "ESCALATE",
+        "STOP",
+    ] = "NORMAL"
