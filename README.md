@@ -1,21 +1,633 @@
 ﻿# ATRR — Agentic Transaction Recovery & Replanning
 
-**ATRR (Agentic Transaction Recovery & Replanning)** is an agentic transaction recovery platform designed to recover failed transactions through constraint-aware recovery planning, merchant policy verification, customer approval, execution control, and adaptive replanning.
+> **Track 03 — AI Revenue Recovery**
 
-Instead of stopping at a failed recovery attempt, ATRR evaluates available recovery options, selects the best valid action, verifies policy constraints, executes the action, records the outcome, and can select another available plan when an execution attempt fails.
+### A bounded agentic recovery system that detects revenue at risk, selects the highest-value recovery intervention, executes it safely, replans after failure, and escalates or stops when recovery boundaries are reached.
 
----
+ATRR (**Agentic Transaction Recovery & Replanning**) is a transaction recovery platform designed to recover revenue from failed transactions through constraint-aware decisioning, merchant policy verification, customer approval, controlled execution, adaptive replanning, and measurable batch-level recovery.
 
-## Overview
-
-Failed transactions can create customer dissatisfaction, merchant losses, and unnecessary manual intervention.
-
-ATRR provides a structured recovery workflow that evaluates available recovery actions against transaction requirements and merchant policies.
-
-### Core Recovery Flow
+Rather than relying on a fixed retry mechanism, ATRR treats recovery as a closed-loop process:
 
 ```text
 Failed Transaction
+        |
+        v
+Revenue Risk Detection
+        |
+        v
+Transaction Intent
+        |
+        v
+Candidate & Intervention Generation
+        |
+        v
+Constraint Validation
+        |
+        v
+Recovery Outcome Estimation
+        |
+        v
+Recovery Value Scoring
+        |
+        v
+Decision Agent
+        |
+        v
+Merchant Policy Check
+        |
+        v
+Customer Approval
+        |
+        v
+Execution
+      /   \
+     /     \
+ Success   Failure
+   |          |
+   v          v
+Recover    Replanning
+              |
+              v
+       New Recovery Decision
+          /      |      \
+         /       |       \
+     Recover  Escalate   Stop
+````
+
+The system is designed around four core principles:
+
+**Bounded Autonomy · Economic Decisioning · Adaptive Replanning · Traceability**
+
+---
+
+## 1. Problem
+
+A failed transaction does not always mean lost revenue.
+
+Depending on the situation, a transaction may still be recoverable through a different intervention such as:
+
+* retrying a payment,
+* substituting a product,
+* changing delivery,
+* applying an eligible incentive.
+
+The challenge is deciding **which action should be attempted next**, while respecting customer requirements, merchant policies, economic constraints, and previous execution outcomes.
+
+A simple retry mechanism cannot answer:
+
+> **What is the safest and highest-value recovery action available right now?**
+
+ATRR addresses this problem by continuously evaluating the current recovery state and selecting the best valid intervention.
+
+---
+
+## 2. Solution
+
+ATRR converts failed-transaction recovery into an adaptive decision-and-execution workflow.
+
+The platform:
+
+1. Detects revenue at risk
+2. Builds transaction intent
+3. Discovers recovery candidates
+4. Validates customer constraints
+5. Generates recovery interventions
+6. Estimates recovery outcomes
+7. Calculates expected recovery value
+8. Selects the best available recovery action
+9. Verifies merchant policy
+10. Enforces customer approval
+11. Executes the selected action
+12. Records the execution result
+13. Replans when an execution attempt fails
+14. Escalates after repeated failures
+15. Stops when recovery should no longer continue
+16. Measures recovery performance across a batch
+17. Maintains a structured audit trail
+
+---
+
+## 3. Key Capabilities
+
+### Revenue Risk Detection
+
+ATRR explicitly quantifies the financial exposure associated with a failed transaction.
+
+The Revenue Risk Service provides:
+
+* Risk level
+* Risk score
+* Revenue at risk
+* Recoverable revenue
+* Recovery eligibility
+* Risk explanation
+
+Example:
+
+```text
+Risk Level:           MEDIUM
+Risk Score:           0.60
+Revenue at Risk:      ₹3,299
+Recoverable Revenue:  ₹3,299
+Recovery Eligible:    TRUE
+```
+
+This gives every recovery decision a measurable financial context.
+
+---
+
+### Constraint-Aware Recovery
+
+Recovery decisions are based on the original transaction intent.
+
+Current constraints include:
+
+* Maximum customer budget
+* Minimum product rating
+* Delivery deadline
+* Inventory availability
+* Failed-product exclusion
+
+Only constraint-safe options are eligible for recovery planning.
+
+---
+
+### Multi-Intervention Recovery
+
+ATRR supports multiple recovery strategies rather than relying on a single retry path.
+
+#### Product Substitution
+
+Select an available alternative product that satisfies the customer's requirements.
+
+#### Payment Retry
+
+Retry a failed payment when merchant policy permits it and the configured retry limit has not been reached.
+
+#### Delivery Change
+
+Select an alternative delivery option when it satisfies the transaction's delivery requirement.
+
+#### Offer / Incentive
+
+Apply an eligible merchant incentive while respecting configured merchant limits.
+
+---
+
+## 4. Recovery Value Decisioning
+
+Each candidate intervention is represented as a structured recovery plan.
+
+Plans contain information such as:
+
+* Action type
+* Product or offer
+* Customer cost
+* Expected revenue
+* Merchant value
+* Success probability
+* Constraint safety
+* Expected recovery value
+
+ATRR prioritizes interventions using **expected recovery value**.
+
+Conceptually:
+
+```text
+Expected Recovery Outcome
+            ×
+     Success Probability
+            -
+      Recovery Cost
+            =
+   Expected Recovery Value
+```
+
+Example recovery options:
+
+```text
+Recovery Options
+
+SUB-P001             ₹2,639.20
+DELIVERY-EXPRESS     ₹2,309.30
+RETRY-P003-1         ₹2,144.35
+OFFER-OFF002         ₹2,124.25
+
+          ↓
+
+    Decision Agent
+
+          ↓
+
+       SUB-P001
+```
+
+This allows recovery decisions to consider both feasibility and economic impact.
+
+---
+
+## 5. Decision Agent
+
+The Decision Agent evaluates the current recovery state and selects the highest-value available recovery plan that has not already been attempted.
+
+The decision context includes:
+
+* Transaction intent
+* Available recovery plans
+* Merchant policy
+* Previous recovery attempts
+* Current recovery state
+* Simulation scenario
+
+Previously attempted actions are excluded from subsequent decisions, allowing the system to choose a different recovery path after failure.
+
+The decision loop is:
+
+```text
+Observe
+   ↓
+Evaluate
+   ↓
+Decide
+   ↓
+Act
+   ↓
+Observe Outcome
+   ↓
+Replan when necessary
+```
+
+The current Decision Agent is implemented as deterministic application logic rather than an LLM-based decision system.
+
+---
+
+## 6. Policy and Customer Safety Gates
+
+ATRR separates recovery decisioning from execution.
+
+A selected recovery action must pass the required safeguards before execution:
+
+```text
+Decision Agent
+      |
+      v
+Selected Recovery Action
+      |
+      v
+Merchant Policy Check
+      |
+      v
+Customer Approval
+      |
+      v
+Execution
+```
+
+### Merchant Policy Verification
+
+The policy engine evaluates whether the selected action is permitted under the merchant's configured rules.
+
+Typical checks include:
+
+* Whether the action is allowed
+* Payment retry limits
+* Incentive limits
+* Product substitution rules
+* Delivery-change permissions
+* Action-specific constraints
+
+### Customer Approval
+
+Customer authorization is an explicit execution gate.
+
+Without approval, automated recovery execution does not continue.
+
+This ensures the system does not silently perform customer-impacting recovery actions without authorization.
+
+---
+
+## 7. Adaptive Replanning
+
+ATRR does not blindly repeat a failed recovery action.
+
+When execution fails, the system records the attempt, updates the recovery context, excludes the failed action, generates remaining options, and asks the Decision Agent to select the next available action.
+
+```text
+Attempt 1
+    |
+    v
+Execution Failure
+    |
+    v
+Record Attempt
+    |
+    v
+Update Recovery Context
+    |
+    v
+Exclude Attempted Action
+    |
+    v
+Generate Remaining Options
+    |
+    v
+Re-score Recovery Plans
+    |
+    v
+Decision Agent
+    |
+    v
+Attempt 2
+```
+
+Example:
+
+```text
+Delivery Change
+      |
+      v
+    FAILED
+      |
+      v
+  REPLANNING
+      |
+      v
+Payment Retry
+      |
+      v
+   SUCCESS
+      |
+      v
+  RECOVERED
+```
+
+This adaptive behavior is the core agentic capability of ATRR.
+
+---
+
+## 8. Bounded Autonomy
+
+An automated recovery system should not continue indefinitely.
+
+ATRR implements explicit boundaries for repeated failure and recovery termination.
+
+### Escalation
+
+When automated recovery reaches the configured failure boundary:
+
+```text
+Repeated Recovery Failure
+        |
+        v
+     Guardrail
+        |
+        v
+    ESCALATED
+```
+
+### Stop
+
+When the recovery process should not proceed:
+
+```text
+Recovery Decision
+       |
+       v
+      STOP
+       |
+       v
+No Execution
+       |
+       v
+RECOVERY_STOPPED
+```
+
+These controls create a bounded recovery workflow rather than an uncontrolled autonomous loop.
+
+---
+
+## 9. Batch Recovery
+
+ATRR supports recovery across multiple transactions and measures the resulting financial impact.
+
+The batch engine calculates:
+
+* Transactions evaluated
+* Recovery eligible
+* Transactions recovered
+* Transactions failed
+* Transactions blocked
+* Multi-attempt transactions
+* Transactions escalated
+* Transactions stopped
+* Revenue at risk
+* Revenue recovered
+* Transaction recovery rate
+* Revenue recovery rate
+
+This directly supports the Track 03 requirement to demonstrate **measured money recovered across a batch**.
+
+---
+
+## 10. Verified Batch Demonstration
+
+ATRR includes deterministic simulation scenarios so that recovery behavior can be reproduced consistently during demonstrations.
+
+The verified demonstration batch contained:
+
+```text
+FINAL-NORMAL-001
+FINAL-REPLAN-001
+FINAL-REPLAN-002
+FINAL-ESCALATE-001
+FINAL-STOP-001
+```
+
+### Batch Results
+
+| Metric                     |  Result |
+| -------------------------- | ------: |
+| Transactions evaluated     |       5 |
+| Recovery eligible          |       5 |
+| Transactions recovered     |       3 |
+| Transactions failed        |       0 |
+| Transactions blocked       |       0 |
+| Multi-attempt transactions |       3 |
+| Transactions escalated     |       1 |
+| Transactions stopped       |       1 |
+| Revenue at risk            | ₹15,295 |
+| Revenue recovered          |  ₹8,697 |
+| Transaction recovery rate  |   60.0% |
+| Revenue recovery rate      |  56.86% |
+
+### Scenario Behavior
+
+#### NORMAL
+
+```text
+NORMAL
+   |
+   v
+RECOVERED
+```
+
+#### REPLAN
+
+```text
+REPLAN
+   |
+   v
+First Action Fails
+   |
+   v
+Replanning
+   |
+   v
+New Action Selected
+   |
+   v
+RECOVERED
+```
+
+#### ESCALATE
+
+```text
+ESCALATE
+   |
+   v
+Repeated Failures
+   |
+   v
+Guardrail
+   |
+   v
+ESCALATED
+```
+
+#### STOP
+
+```text
+STOP
+   |
+   v
+Execution Prevented
+   |
+   v
+RECOVERY_STOPPED
+```
+
+> **Metric note:** the backend metric `transactions_replanned` is displayed as **Multi-attempt** in the frontend because it counts transactions that required more than one automated attempt.
+
+---
+
+## 11. Auditability
+
+ATRR records the major events produced throughout the recovery lifecycle.
+
+A typical successful recovery produces:
+
+```text
+REVENUE_RISK_DETECTED
+        ↓
+RECOVERY_STARTED
+        ↓
+PLANS_GENERATED
+        ↓
+AGENT_DECISION
+        ↓
+ACTION_PROPOSED
+        ↓
+POLICY_CHECK
+        ↓
+EXECUTION
+        ↓
+RECOVERY_COMPLETED
+```
+
+A transaction involving replanning produces:
+
+```text
+EXECUTION
+    ↓
+REPLANNING_TRIGGERED
+    ↓
+PLANS_GENERATED
+    ↓
+AGENT_DECISION
+    ↓
+ACTION_PROPOSED
+    ↓
+POLICY_CHECK
+    ↓
+EXECUTION
+    ↓
+RECOVERY_COMPLETED
+```
+
+Audit information includes:
+
+* Revenue risk detection
+* Recovery plans
+* Agent decisions
+* Proposed actions
+* Policy decisions
+* Execution outcomes
+* Failed attempts
+* Replanning events
+* Recovery completion
+* Escalation events
+* Stop events
+
+This provides traceability across the recovery lifecycle.
+
+---
+
+# 12. System Architecture
+
+```text
+                           +----------------------------+
+                           |       React Frontend       |
+                           |                            |
+                           |   Single Recovery          |
+                           |   Batch Intelligence       |
+                           +-------------+--------------+
+                                         |
+                                         | HTTP / JSON
+                                         v
+                           +----------------------------+
+                           |         FastAPI API        |
+                           |                            |
+                           |  /api/v1/recover           |
+                           |  /api/v1/recover/batch     |
+                           +-------------+--------------+
+                                         |
+                                         v
+                           +----------------------------+
+                           |    Recovery Orchestrator    |
+                           +-------------+--------------+
+                                         |
+          +------------------------------+------------------------------+
+          |                |             |             |                |
+          v                v             v             v                v
+   Revenue Risk       Candidate      Decision       Policy          Execution
+     Service         Services        Agent          Service          Service
+                           |
+                           v
+                    Replanning Service
+                           |
+                           v
+                      Audit Service
+```
+
+---
+
+# 13. Recovery Pipeline
+
+```text
+Failed Transaction
+        |
+        v
+Revenue Risk Detection
         |
         v
 Transaction Intent
@@ -27,243 +639,168 @@ Candidate Discovery
 Constraint Validation
         |
         v
-Recovery Plan Generation
+Recovery Intervention Generation
         |
         v
-Recovery Plan Ranking
+Outcome Estimation
+        |
+        v
+Recovery Value Scoring
         |
         v
 Decision Agent
         |
         v
-Policy Verification
+Merchant Policy Verification
         |
         v
 Customer Approval
         |
         v
 Execution
-      /     \
-     /       \
- Success    Failure
-    |          |
-    v          v
-Recovered   Replanning
-               |
-               v
-         Decision Agent
-               |
-               v
-        Next Safe Action
+        |
+        +----------------------+
+        |                      |
+        v                      v
+     SUCCESS                FAILURE
+        |                      |
+        v                      v
+   RECOVERED               REPLANNING
+                               |
+                               v
+                        New Decision
+                               |
+                    +----------+----------+
+                    |          |          |
+                    v          v          v
+                 Recover   Escalate     Stop
 ```
 
 ---
 
-## Features
+# 14. Frontend
 
-### Constraint-Aware Recovery
+ATRR provides a React-based transaction operations dashboard.
 
-ATRR evaluates recovery candidates against transaction requirements such as:
+## Single Recovery
 
-* Maximum customer budget
-* Minimum product rating
-* Delivery deadline
-* Failed product exclusion
+The Single Recovery interface provides:
 
-Only candidates that satisfy the current constraints are converted into executable recovery plans.
+* Transaction details
+* Customer constraints
+* Customer approval
+* Recovery execution
+* Revenue risk
+* Selected intervention
+* Expected recovery value
+* Success probability
+* Recovery attempts
+* Recovery journey
+* Audit trail
 
-### Recovery Plan Generation
-
-Valid candidates are transformed into structured recovery plans containing:
-
-* Plan ID
-* Action type
-* Product ID
-* Customer cost
-* Expected revenue
-* Expected merchant value
-* Constraint status
-* Recovery explanation
-
-### Recovery Plan Ranking
-
-Recovery plans are ranked using expected merchant value so that ATRR can prioritize the best available valid recovery option.
-
-### Decision Agent
-
-The Decision Agent receives the current recovery context and selects the highest-ranked recovery plan that has not already been attempted.
-
-The decision context includes:
-
-* Transaction intent
-* Available recovery plans
-* Merchant policy
-* Previous recovery attempts
-
-### Merchant Policy Verification
-
-Before execution, the selected recovery action is checked against the applicable merchant policy.
-
-### Customer Approval
-
-Customer approval is treated as an explicit execution gate.
-
-If approval is not provided, the recovery process stops without executing another recovery action.
-
-### Automatic Replanning
-
-When a recovery execution attempt fails, ATRR records the failed attempt and updates the recovery context.
-
-Previously attempted actions are excluded from subsequent decisions so another available recovery plan can be selected.
-
-### Audit Trail
-
-ATRR records important recovery events throughout the recovery lifecycle, including:
+### UI Flow
 
 ```text
-RECOVERY_STARTED
-PLANS_GENERATED
-AGENT_DECISION
-ACTION_PROPOSED
-POLICY_CHECK
-EXECUTION
-REPLANNING_TRIGGERED
-RECOVERY_COMPLETED
-RECOVERY_FAILED
+Recovery Request
+       |
+       v
+Process Status
+       |
+       v
+Agent Decision
+       |
+       v
+Recovery Journey
+       |
+       v
+Audit Trail
 ```
 
 ---
 
-## System Architecture
+## Batch Intelligence
+
+The Batch Intelligence dashboard provides a financial and operational view of multiple recovery cases.
+
+### Recovery KPIs
 
 ```text
-                         +----------------------+
-                         |    React Frontend    |
-                         |   Recovery Console   |
-                         +----------+-----------+
-                                    |
-                                    | HTTP / JSON
-                                    v
-                         +----------------------+
-                         |     FastAPI API      |
-                         |   /api/v1/recover    |
-                         +----------+-----------+
-                                    |
-                                    v
-                         +----------------------+
-                         | Recovery Orchestrator|
-                         +----------+-----------+
-                                    |
-          +-------------------------+-------------------------+
-          |             |             |            |          |
-          v             v             v            v          v
-     Candidate      Recovery      Decision      Policy    Execution
-      Service       Service         Agent       Service    Service
-                                    |
-                                    v
-                            Replanning Service
-                                    |
-                                    v
-                              Audit Service
+Revenue at Risk
+Revenue Recovered
+Recovery Rate
+Revenue Recovery
+Multi-attempt
+Escalated
+Stopped
 ```
 
----
-
-## Recovery Decision Flow
+### Revenue Recovery
 
 ```text
-Failed Transaction
-        |
-        v
-Create Transaction Intent
-        |
-        v
-Find Recovery Candidates
-        |
-        v
-Validate Constraints
-        |
-        v
-Generate Recovery Plans
-        |
-        v
-Rank Recovery Plans
-        |
-        v
-Decision Agent
-        |
-        v
-Policy Verification
-        |
-        v
-Customer Approval
-        |
-        v
-Execute Selected Action
-        |
-        +-------------------+
-        |                   |
-        v                   v
-     SUCCESS             FAILURE
-        |                   |
-        v                   v
-   RECOVERED         Record Attempt
-                            |
-                            v
-                     Replanning
-                            |
-                            v
-                     Decision Agent
-                            |
-                            v
-                    Next Safe Action
+Revenue at Risk
+        ↓
+Revenue Recovered
+        ↓
+Remaining Risk
+```
+
+### Transaction Queue
+
+Each transaction displays:
+
+```text
+Transaction ID
+Risk Level
+Revenue at Risk
+Recovery Decision
+Attempt Count
+Final Outcome
 ```
 
 ---
 
-## Technology Stack
+# 15. Technology Stack
 
-### Backend
+## Backend
 
 * Python 3.11
 * FastAPI
 * Pydantic
 * Uvicorn
+* Pandas
+* NumPy
 * Pytest
 
-### Frontend
+## Frontend
 
 * React 19
 * Vite
 * Axios
-* Tailwind CSS
 * Lucide React
-* React Router
 * Recharts
 
-### Data Layer
+## Data Layer
 
 The current prototype uses CSV-based data for:
 
 * Products
-* Inventory
 * Merchants
+* Inventory
 * Offers
+* Policies
 * Delivery options
-* Merchant policies
 
-### Development Tools
+## Development
 
 * Git
 * GitHub
 * Visual Studio Code
 * PowerShell
 * npm
-* Pytest
 
 ---
 
-## Project Structure
+# 16. Project Structure
 
 ```text
 ATRR-Agentic-Transaction-Recovery/
@@ -271,21 +808,16 @@ ATRR-Agentic-Transaction-Recovery/
 ├── backend/
 │   └── app/
 │       ├── agents/
-│       │   ├── __init__.py
 │       │   ├── agent_context.py
 │       │   └── decision_agent.py
 │       │
 │       ├── api/
-│       │   ├── __init__.py
 │       │   └── recovery.py
 │       │
-│       ├── core/
-│       │   └── __init__.py
-│       │
 │       ├── models/
-│       │   ├── __init__.py
 │       │   ├── agent_decision.py
 │       │   ├── audit_event.py
+│       │   ├── batch_recovery.py
 │       │   ├── candidate.py
 │       │   ├── constraint_result.py
 │       │   ├── execution_request.py
@@ -294,13 +826,16 @@ ATRR-Agentic-Transaction-Recovery/
 │       │   ├── policy_decision.py
 │       │   ├── recovery_action.py
 │       │   ├── recovery_attempt.py
+│       │   ├── recovery_intervention.py
+│       │   ├── recovery_outcome.py
 │       │   ├── recovery_plan.py
 │       │   ├── recovery_request.py
+│       │   ├── revenue_risk.py
 │       │   └── transaction_intent.py
 │       │
 │       ├── services/
-│       │   ├── __init__.py
 │       │   ├── audit_service.py
+│       │   ├── batch_recovery_service.py
 │       │   ├── candidate_service.py
 │       │   ├── constraint_service.py
 │       │   ├── execution_service.py
@@ -308,8 +843,11 @@ ATRR-Agentic-Transaction-Recovery/
 │       │   ├── policy_service.py
 │       │   ├── recovery_action_service.py
 │       │   ├── recovery_orchestrator.py
+│       │   ├── recovery_outcome_service.py
 │       │   ├── recovery_service.py
-│       │   └── replanning_service.py
+│       │   ├── recovery_value_service.py
+│       │   ├── replanning_service.py
+│       │   └── revenue_risk_service.py
 │       │
 │       └── main.py
 │
@@ -323,14 +861,11 @@ ATRR-Agentic-Transaction-Recovery/
 │
 ├── frontend/
 │   ├── public/
-│   │   └── favicon.svg
-│   │
 │   ├── src/
-│   │   ├── App.css
 │   │   ├── App.jsx
+│   │   ├── App.css
 │   │   ├── index.css
 │   │   └── main.jsx
-│   │
 │   ├── eslint.config.js
 │   ├── index.html
 │   ├── package-lock.json
@@ -339,6 +874,7 @@ ATRR-Agentic-Transaction-Recovery/
 │
 ├── tests/
 │   ├── test_audit_service.py
+│   ├── test_batch_recovery_service.py
 │   ├── test_candidate_service.py
 │   ├── test_constraint_service.py
 │   ├── test_decision_agent.py
@@ -347,8 +883,10 @@ ATRR-Agentic-Transaction-Recovery/
 │   ├── test_policy_service.py
 │   ├── test_recovery_action_service.py
 │   ├── test_recovery_orchestrator.py
+│   ├── test_recovery_outcome_service.py
 │   ├── test_recovery_service.py
 │   ├── test_replanning_service.py
+│   ├── test_revenue_risk_service.py
 │   └── test_transaction_intent.py
 │
 ├── .gitignore
@@ -358,46 +896,43 @@ ATRR-Agentic-Transaction-Recovery/
 
 ---
 
-## Installation
+# 17. Installation
 
-### Prerequisites
-
-Make sure you have the following installed:
+## Prerequisites
 
 * Python 3.11+
 * Node.js
 * npm
 * Git
 
-### Clone the Repository
+## Clone Repository
 
 ```bash
 git clone https://github.com/Anvi-2006/ATRR-Agentic-Transaction-Recovery.git
 cd ATRR-Agentic-Transaction-Recovery
 ```
 
-### Create the Python Virtual Environment
+## Backend Setup
 
-Windows PowerShell:
+Create a virtual environment:
 
 ```powershell
 python -m venv venv
-.\venv\Scripts\Activate.ps1
 ```
 
-If the virtual environment already exists:
+Activate it:
 
 ```powershell
 .\venv\Scripts\Activate.ps1
 ```
 
-### Install Backend Dependencies
+Install Python dependencies:
 
 ```powershell
 pip install -r requirements.txt
 ```
 
-### Install Frontend Dependencies
+## Frontend Setup
 
 ```powershell
 cd frontend
@@ -407,9 +942,9 @@ cd ..
 
 ---
 
-## Running the Application
+# 18. Running ATRR
 
-### Start the Backend
+## Start Backend
 
 From the project root:
 
@@ -417,15 +952,13 @@ From the project root:
 python -m uvicorn backend.app.main:app --reload --port 8000
 ```
 
-The backend will run at:
+Backend:
 
 ```text
 http://127.0.0.1:8000
 ```
 
-### Health Check
-
-Open:
+## Health Check
 
 ```text
 http://127.0.0.1:8000/health
@@ -441,15 +974,15 @@ Expected response:
 }
 ```
 
-### API Documentation
+## API Documentation
 
-FastAPI interactive documentation is available at:
+FastAPI Swagger UI:
 
 ```text
 http://127.0.0.1:8000/docs
 ```
 
-### Start the Frontend
+## Start Frontend
 
 Open a second terminal:
 
@@ -458,279 +991,125 @@ cd frontend
 npm run dev
 ```
 
-Vite will provide a local URL, typically:
+Vite will provide a local frontend URL, for example:
 
 ```text
 http://localhost:5173
 ```
 
-If the port is already in use, Vite will automatically select another available port.
+If the port is occupied, Vite automatically selects another available port.
 
 ---
 
-## API
+# 19. API
 
-### Recovery Endpoint
+## Single Transaction Recovery
 
 ```text
 POST /api/v1/recover
 ```
 
-### Request Body
+Example request:
 
 ```json
 {
   "transaction_id": "TXN-DEMO-001",
+  "failed_product_id": "P003",
   "category": "headphones",
   "max_budget": 5000,
   "min_rating": 4.0,
   "delivery_deadline_days": 2,
-  "failed_product_id": "P003",
-  "customer_approved": true
+  "customer_approved": true,
+  "simulation_scenario": "NORMAL"
 }
 ```
 
-### Successful Response
+The response contains:
+
+* Transaction status
+* Revenue risk
+* Selected recovery action
+* Recovery attempts
+* Audit events
+* Recovery outcome
+
+---
+
+## Batch Recovery
+
+```text
+POST /api/v1/recover/batch
+```
+
+Example request:
 
 ```json
 {
-  "transaction_id": "TXN-DEMO-001",
-  "status": "RECOVERED",
-  "selected_action": {
-    "action_id": "SUB-P001",
-    "action_type": "substitute_product",
-    "product_id": "P001",
-    "customer_cost": 4499.0,
-    "merchant_value": 809.82,
-    "constraint_safe": true
-  }
+  "simulation_mode": true,
+  "transactions": [
+    {
+      "transaction_id": "FINAL-NORMAL-001",
+      "failed_product_id": "P003",
+      "category": "headphones",
+      "max_budget": 5000,
+      "min_rating": 4.0,
+      "delivery_deadline_days": 2,
+      "customer_approved": true,
+      "simulation_scenario": "NORMAL"
+    }
+  ]
 }
 ```
 
-The complete response also contains recovery attempts and audit events.
-
----
-
-## Customer Approval Flow
-
-Customer approval acts as an explicit execution safeguard.
+Supported deterministic simulation scenarios:
 
 ```text
-Recovery Plan
-      |
-      v
-Policy Check
-      |
-      v
-Customer Approval?
-     /       \
-   YES        NO
-    |          |
-    v          v
- Execute     Blocked
-    |          |
-    v          v
-Recovered   CUSTOMER_APPROVAL_REQUIRED
-```
-
-This ensures the platform does not continue recovery execution without customer authorization.
-
----
-
-## Replanning
-
-ATRR supports adaptive recovery when an execution attempt fails.
-
-The Decision Agent receives previous recovery attempts as part of the current recovery context.
-
-Previously attempted actions are excluded from subsequent decisions.
-
-```text
-Attempt 1
-   |
-   v
-Execution Failure
-   |
-   v
-Recovery Attempt Recorded
-   |
-   v
-REPLANNING_TRIGGERED
-   |
-   v
-Decision Agent
-   |
-   v
-Attempted Action Excluded
-   |
-   v
-Attempt 2
-   |
-   v
-Execution Success
-   |
-   v
-RECOVERED
-```
-
-The replanning behavior is covered by:
-
-```text
-tests/test_recovery_orchestrator.py
-```
-
-Specifically:
-
-```text
-test_agent_replans_after_execution_failure
+NORMAL
+REPLAN
+ESCALATE
+STOP
 ```
 
 ---
 
-## Audit Trail
-
-ATRR provides a structured audit trail for recovery decisions and actions.
-
-### Typical Successful Recovery
-
-```text
-RECOVERY_STARTED
-        ↓
-PLANS_GENERATED
-        ↓
-AGENT_DECISION
-        ↓
-ACTION_PROPOSED
-        ↓
-POLICY_CHECK
-        ↓
-EXECUTION
-        ↓
-RECOVERY_COMPLETED
-```
-
-### Recovery with Replanning
-
-```text
-EXECUTION
-    |
-    v
-REPLANNING_TRIGGERED
-    |
-    v
-AGENT_DECISION
-    |
-    v
-ACTION_PROPOSED
-    |
-    v
-POLICY_CHECK
-    |
-    v
-EXECUTION
-    |
-    v
-RECOVERY_COMPLETED
-```
-
----
-
-## Example Recovery Scenario
-
-A sample recovery request can use:
-
-| Field             | Value          |
-| ----------------- | -------------- |
-| Transaction ID    | `TXN-DEMO-001` |
-| Category          | `headphones`   |
-| Maximum budget    | ₹5,000         |
-| Minimum rating    | 4.0            |
-| Delivery deadline | 2 days         |
-| Failed product    | `P003`         |
-| Customer approval | Approved       |
-
-Example recovery outcome:
-
-| Result           | Value              |
-| ---------------- | ------------------ |
-| Selected product | `P001`             |
-| Action           | Substitute product |
-| Customer cost    | ₹4,499             |
-| Merchant value   | ₹809.82            |
-| Constraint check | Passed             |
-| Final status     | `RECOVERED`        |
-
----
-
-## Frontend
-
-The React frontend provides a transaction recovery console where users can:
-
-* Enter transaction details
-* Set the maximum budget
-* Set the minimum rating
-* Set the delivery deadline
-* Specify the failed product
-* Provide customer approval
-* Start a recovery request
-* View recovery status
-* View the selected recovery action
-* View recovery activity
-* View the audit trail
-
-### UI Flow
-
-```text
-Recovery Request
-       |
-       v
-Process Status
-       |
-       v
-Selected Recovery
-       |
-       v
-Recovery Activity
-```
-
-The interface is designed as a transaction operations console focused on recovery decisions, outcomes, and auditability.
-
----
-
-## Testing
+# 20. Testing
 
 Run the complete backend test suite:
 
 ```powershell
-python -m pytest
+python -m pytest -q
 ```
 
-### Current Test Result
+Verified result:
 
 ```text
-59 passed
+83 passed
 ```
 
-The test suite covers:
+The automated tests cover:
 
-* Transaction intent
-* Candidate selection
+* Transaction intent validation
+* Candidate discovery
 * Constraint validation
-* Decision Agent
-* Execution service
-* Merchant data service
-* Policy service
-* Recovery action service
+* Decision Agent behavior
+* Merchant data services
+* Merchant policy verification
+* Recovery actions
 * Recovery service
 * Recovery orchestration
-* Replanning service
-* Audit service
+* Replanning
+* Execution
+* Recovery outcome estimation
+* Recovery value scoring
+* Revenue risk detection
+* Batch recovery
+* Audit behavior
 
 ---
 
-## Frontend Production Build
+# 21. Frontend Build Verification
 
-To verify the frontend production build:
+From the frontend directory:
 
 ```powershell
 cd frontend
@@ -741,11 +1120,11 @@ The production frontend build has been successfully verified.
 
 ---
 
-## Design Principles
+# 22. Design Principles
 
 ### Safety
 
-Recovery actions must satisfy customer and merchant constraints before execution.
+Recovery actions must satisfy applicable customer and merchant constraints before execution.
 
 ### Customer Control
 
@@ -753,139 +1132,242 @@ Customer approval remains an explicit execution gate.
 
 ### Adaptability
 
-Failed recovery attempts can trigger another decision using the updated recovery context.
+Failed recovery attempts can trigger a new decision using the updated recovery context.
+
+### Bounded Autonomy
+
+ATRR can escalate or stop rather than continuing recovery indefinitely.
+
+### Economic Decisioning
+
+Recovery interventions are prioritized using expected recovery value.
 
 ### Traceability
 
-Recovery decisions, policy checks, execution outcomes, and recovery results are recorded in the audit trail.
+Recovery decisions, policy checks, execution outcomes, and recovery results are recorded through the audit trail.
 
 ---
 
-## Current Implementation Status
+# 23. Current Implementation Status
 
-| Component                            | Status      |
-| ------------------------------------ | ----------- |
-| Constraint-aware candidate selection | ✅           |
-| Recovery plan generation             | ✅           |
-| Recovery plan ranking                | ✅           |
-| Decision Agent                       | ✅           |
-| Policy verification                  | ✅           |
-| Customer approval gate               | ✅           |
-| Execution gate                       | ✅           |
-| Recovery attempt tracking            | ✅           |
-| Replanning after execution failure   | ✅           |
-| Audit trail                          | ✅           |
-| FastAPI recovery API                 | ✅           |
-| React frontend                       | ✅           |
-| Frontend-to-backend integration      | ✅           |
-| Backend test suite                   | ✅ 59 passed |
-| Frontend production build            | ✅           |
+| Component                            |    Status   |
+| ------------------------------------ | :---------: |
+| Revenue risk detection               |      ✅      |
+| Constraint-aware candidate selection |      ✅      |
+| Recovery intervention generation     |      ✅      |
+| Recovery outcome estimation          |      ✅      |
+| Recovery value scoring               |      ✅      |
+| Decision Agent                       |      ✅      |
+| Merchant policy verification         |      ✅      |
+| Customer approval gate               |      ✅      |
+| Execution gate                       |      ✅      |
+| Recovery attempt tracking            |      ✅      |
+| Adaptive replanning                  |      ✅      |
+| Escalation guardrail                 |      ✅      |
+| Stop behavior                        |      ✅      |
+| Batch recovery                       |      ✅      |
+| Revenue recovery metrics             |      ✅      |
+| Audit trail                          |      ✅      |
+| FastAPI recovery API                 |      ✅      |
+| React frontend                       |      ✅      |
+| Single Recovery dashboard            |      ✅      |
+| Batch Intelligence dashboard         |      ✅      |
+| Frontend-backend integration         |      ✅      |
+| Backend test suite                   | ✅ 83 passed |
+| Frontend production build            |      ✅      |
 
 ---
 
-## Future Improvements
+# 24. Demo Scenarios
 
-Possible future enhancements include:
+## Normal Recovery
+
+```text
+Failed Transaction
+      |
+      v
+Revenue Risk
+      |
+      v
+Recovery Plans
+      |
+      v
+Decision Agent
+      |
+      v
+Policy + Approval
+      |
+      v
+Execution
+      |
+      v
+RECOVERED
+```
+
+## Replanning
+
+```text
+Recovery Action
+      |
+      v
+Execution Failure
+      |
+      v
+Record Attempt
+      |
+      v
+Replanning
+      |
+      v
+New Decision
+      |
+      v
+Next Safe Action
+      |
+      v
+RECOVERED
+```
+
+## Escalation
+
+```text
+Recovery Attempt
+      |
+      v
+FAILURE
+      |
+      v
+Replanning
+      |
+      v
+FAILURE
+      |
+      v
+Guardrail
+      |
+      v
+ESCALATED
+```
+
+## Stop
+
+```text
+Recovery Decision
+      |
+      v
+STOP
+      |
+      v
+Execution Prevented
+      |
+      v
+RECOVERY_STOPPED
+```
+
+---
+
+# 25. Project Outcomes
+
+ATRR demonstrates the transition from simple transaction retries to adaptive, measurable revenue recovery.
+
+The overall operating model is:
+
+```text
+Detect
+  ↓
+Decide
+  ↓
+Execute
+  ↓
+Observe
+  ↓
+Replan
+  ↓
+Recover / Escalate / Stop
+  ↓
+Measure
+  ↓
+Audit
+```
+
+The verified demonstration batch produced:
+
+```text
+₹15,295
+Revenue at Risk
+
+₹8,697
+Revenue Recovered
+
+60.0%
+Transaction Recovery Rate
+
+56.86%
+Revenue Recovery Rate
+```
+
+These results demonstrate that ATRR measures recovery at both the **transaction level** and the **financial level**.
+
+---
+
+# 26. Limitations
+
+The current implementation is a hackathon prototype.
+
+It currently uses:
+
+* CSV-based data
+* Deterministic simulation scenarios
+* Local FastAPI execution
+* Local React frontend
+* In-memory recovery execution state
+
+It does not currently integrate with live payment gateways or production merchant systems.
+
+The Decision Agent is implemented using deterministic application logic rather than a production LLM-based agent.
+
+---
+
+# 27. Future Improvements
+
+Potential extensions include:
 
 * Persistent transaction storage
 * Production database integration
-* Real merchant API integration
 * Real payment gateway integration
+* Real merchant API integration
 * Real-time transaction monitoring
-* Authentication and role-based access
-* Advanced recovery analytics
+* Authentication and role-based access control
 * Notification services
-* Production-grade observability
+* Production observability
 * Distributed execution workers
-* Additional recovery action types
-* Enhanced recovery simulation and failure scenarios
+* Additional recovery interventions
+* Advanced recovery analytics
+* LLM-assisted decision explanations
+* Production-grade simulation environments
 
 ---
 
-## Screenshots
+# 28. Repository
 
-Add screenshots of the application here when preparing the final repository presentation.
+**GitHub Repository**
 
-Recommended screenshots:
-
-1. **ATRR Transaction Recovery Dashboard**
-2. **Successful Recovery Result**
-3. **Recovery Status Pipeline**
-4. **Recovery Audit Trail**
-5. **Replanning Scenario**
-
-Suggested directory:
-
-```text
-screenshots/
-├── dashboard.png
-├── recovery-success.png
-├── audit-trail.png
-└── replanning.png
-```
-
-Once screenshots are added, they can be embedded using standard Markdown image syntax:
-
-```markdown
-![ATRR Dashboard](screenshots/dashboard.png)
-```
+[https://github.com/Anvi-2006/ATRR-Agentic-Transaction-Recovery](https://github.com/Anvi-2006/ATRR-Agentic-Transaction-Recovery)
 
 ---
 
-## Demo Flow
-
-A basic demonstration can follow this sequence:
-
-```text
-1. Enter a failed transaction.
-2. Define the customer's recovery constraints.
-3. Provide customer approval.
-4. Start the recovery process.
-5. Review the selected recovery plan.
-6. Verify the policy status.
-7. Execute the selected recovery action.
-8. View the final recovery result.
-9. Review the audit trail.
-```
-
-For an adaptive recovery scenario:
-
-```text
-First Action
-     |
-     v
-Execution Failure
-     |
-     v
-Replanning
-     |
-     v
-Next Safe Action
-     |
-     v
-Successful Recovery
-```
-
----
-
-## Repository
-
-**GitHub Repository:**
-
-https://github.com/Anvi-2006/ATRR-Agentic-Transaction-Recovery
-
----
-
-## Author
+# 29. Author
 
 **Anvi Pardhi**
 
 Information Technology Student
 
-Interested in software engineering, full-stack development, AI systems, and building practical technology solutions.
+Focused on software engineering, AI systems, full-stack development, and practical technology solutions.
 
 ---
 
-## License
+# License
 
-This project was developed as a hackathon prototype for exploring safe, adaptive, and traceable transaction recovery workflows.
+This project was developed as a hackathon prototype for exploring safe, adaptive, measurable, and traceable transaction recovery workflows.
+
+
