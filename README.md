@@ -4,6 +4,10 @@
 
 ### A bounded agentic recovery system that detects revenue at risk, selects the highest-value recovery intervention, executes it safely, replans after failure, and escalates or stops when recovery boundaries are reached.
 
+**🚀 Live Prototype:** https://atrr-agentic-transaction-recovery.vercel.app/
+
+**🔗 GitHub:** https://github.com/Anvi-2006/ATRR-Agentic-Transaction-Recovery
+
 ATRR (**Agentic Transaction Recovery & Replanning**) is a transaction recovery platform designed to recover revenue from failed transactions through constraint-aware decisioning, merchant policy verification, customer approval, controlled execution, adaptive replanning, and measurable batch-level recovery.
 
 Rather than relying on a fixed retry mechanism, ATRR treats recovery as a closed-loop process:
